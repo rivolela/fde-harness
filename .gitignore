@@ -1,0 +1,19 @@
+# Operating System
+.DS_Store
+Thumbs.db
+
+# User specific configs
+*.user.toml
+
+# Dependencies & Environment
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Python / uv cache
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
