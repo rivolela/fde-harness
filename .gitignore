@@ -17,3 +17,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .venv/
+
+# BMAD Framework
+_bmad/
+_bmad-output/
+.agent/
+.agents/
