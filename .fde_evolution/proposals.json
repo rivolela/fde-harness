@@ -1,0 +1,80 @@
+[
+  {
+    "proposal_id": "PROP-1791644669-PROACTIVE",
+    "target_pillar": "Pillar 2: AI Systems",
+    "category": "WORKFLOW_GUARD",
+    "title": "Scale benchmarking to 500+ enterprise regression test cases",
+    "rationale": "Recent 1 interactions executed cleanly. Next maturity step is rigorous regression suite scaling.",
+    "action_items": [
+      "Synthesize 20 edge-case synthetic enterprise policy documents.",
+      "Add automated ground-truth faithfulness benchmarks before each sprint release."
+    ],
+    "status": "PROPOSED",
+    "created_at": 1791644669.795376
+  },
+  {
+    "proposal_id": "PROP-1791645255-PROACTIVE",
+    "target_pillar": "Pillar 2: AI Systems",
+    "category": "WORKFLOW_GUARD",
+    "title": "Scale benchmarking to 500+ enterprise regression test cases",
+    "rationale": "Recent 3 interactions executed cleanly. Next maturity step is rigorous regression suite scaling.",
+    "action_items": [
+      "Synthesize 20 edge-case synthetic enterprise policy documents.",
+      "Add automated ground-truth faithfulness benchmarks before each sprint release."
+    ],
+    "status": "PROPOSED",
+    "created_at": 1791645255.6288168
+  },
+  {
+    "proposal_id": "PROP-1791646707-PROACTIVE",
+    "target_pillar": "Pillar 2: AI Systems",
+    "category": "WORKFLOW_GUARD",
+    "title": "Scale benchmarking to 500+ enterprise regression test cases",
+    "rationale": "Recent 4 interactions executed cleanly. Next maturity step is rigorous regression suite scaling.",
+    "action_items": [
+      "Synthesize 20 edge-case synthetic enterprise policy documents.",
+      "Add automated ground-truth faithfulness benchmarks before each sprint release."
+    ],
+    "status": "PROPOSED",
+    "created_at": 1791646707.5308218
+  },
+  {
+    "proposal_id": "PROP-1791649285-PROACTIVE",
+    "target_pillar": "Pillar 2: AI Systems",
+    "category": "WORKFLOW_GUARD",
+    "title": "Scale benchmarking to 500+ enterprise regression test cases",
+    "rationale": "Recent 5 interactions executed cleanly. Next maturity step is rigorous regression suite scaling.",
+    "action_items": [
+      "Synthesize 20 edge-case synthetic enterprise policy documents.",
+      "Add automated ground-truth faithfulness benchmarks before each sprint release."
+    ],
+    "status": "PROPOSED",
+    "created_at": 1791649285.860644
+  },
+  {
+    "proposal_id": "PROP-1791650071-PROACTIVE",
+    "target_pillar": "Pillar 2: AI Systems",
+    "category": "WORKFLOW_GUARD",
+    "title": "Scale benchmarking to 500+ enterprise regression test cases",
+    "rationale": "Recent 6 interactions executed cleanly. Next maturity step is rigorous regression suite scaling.",
+    "action_items": [
+      "Synthesize 20 edge-case synthetic enterprise policy documents.",
+      "Add automated ground-truth faithfulness benchmarks before each sprint release."
+    ],
+    "status": "PROPOSED",
+    "created_at": 1791650071.7195678
+  },
+  {
+    "proposal_id": "PROP-1791716393-PROACTIVE",
+    "target_pillar": "Pillar 2: AI Systems",
+    "category": "WORKFLOW_GUARD",
+    "title": "Scale benchmarking to 500+ enterprise regression test cases",
+    "rationale": "Recent 7 interactions executed cleanly. Next maturity step is rigorous regression suite scaling.",
+    "action_items": [
+      "Synthesize 20 edge-case synthetic enterprise policy documents.",
+      "Add automated ground-truth faithfulness benchmarks before each sprint release."
+    ],
+    "status": "PROPOSED",
+    "created_at": 1791716393.725325
+  }
+]

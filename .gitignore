@@ -18,8 +18,10 @@ __pycache__/
 .ruff_cache/
 .venv/
 
-# BMAD Framework
-_bmad/
+# BMAD Framework (Core and skills are tracked for cross-repo portability; outputs and machine overrides are ignored)
 _bmad-output/
-.agent/
-.agents/
+*.user.toml
+
+# FDE Harness Telemetry Cache
+.test_fde_evolution/
+

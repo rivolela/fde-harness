@@ -1,0 +1,19 @@
+[project]
+name = "fde-harness"
+version = "0.1.0"
+description = "Forward Deployed Engineer (FDE) Agent Harness built on the 3 Pillars of FDE and Continuous Evolution"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+    "rich>=13.0",
+    "click>=8.0",
+    "httpx>=0.24",
+]
+
+[project.scripts]
+fde-harness = "fde_harness.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

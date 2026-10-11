@@ -1,0 +1,131 @@
+name: FDE Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  static-security-and-lint:
+    name: 1. Static Security & Defensive AST Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Run Defensive Diagnostics & Secret AST Scanner
+        run: |
+          python -c "
+          from fde_harness.engineering import CodeDiagnostics
+          import glob
+          failed = False
+          for py_file in glob.glob('fde_harness/**/*.py', recursive=True):
+              with open(py_file, 'r') as f:
+                  code = f.read()
+              report = CodeDiagnostics.analyze_python_code(code)
+              if not report.is_valid:
+                  print(f'❌ Security/AST Failure in {py_file}:', report.errors)
+                  failed = True
+          if failed:
+              exit(1)
+          print('✅ All modules passed AST security and secret scan.')
+          "
+
+  unit-and-integration-tests:
+    name: 2. Deterministic Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: static-security-and-lint
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Run Test Suite
+        run: |
+          python -m unittest discover tests
+
+  ai-evals-and-guardrails:
+    name: 3. AI Grounding, Latency & Compliance Evals
+    runs-on: ubuntu-latest
+    needs: unit-and-integration-tests
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Execute End-to-End Enterprise Scenario & Guardrail Gate
+        run: |
+          python -c "
+          from fde_harness import FDEHarness
+          harness = FDEHarness()
+          doc = 'POLICY 101: Approvals under 10000 are eligible for fast-track processing within 30 minutes.'
+          results = harness.run_end_to_end_scenario(
+              problem_statement='Fast track loan triage',
+              sample_enterprise_doc=doc,
+              query='fast-track processing under 10000',
+              baseline_hours=48.0,
+              target_hours=0.5,
+              monthly_volume=1000
+          )
+          eval_res = results['evaluation']
+          if not eval_res['passed_guardrails']:
+              print('❌ Guardrail failure:', eval_res['violations'])
+              exit(1)
+          print(f'✅ AI Evals Passed | Grounding: {eval_res[\"grounding_score\"]*100:.0f}% | Latency: {eval_res[\"latency_ms\"]}ms')
+          "
+
+  self-evolution-check:
+    name: 4. Continuous Self-Evolution Engine Verification
+    runs-on: ubuntu-latest
+    needs: ai-evals-and-guardrails
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Verify Evolution Engine
+        run: |
+          python -c "
+          from fde_harness.evolution import HarnessEvolver
+          evolver = HarnessEvolver()
+          proposals = evolver.generate_proposals()
+          print(f'✅ Evolution Engine active: generated {len(proposals)} proposal(s).')
+          "
