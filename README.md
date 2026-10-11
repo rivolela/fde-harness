@@ -91,12 +91,12 @@ When working inside an existing client codebase, you can bootstrap the harness w
 **Option A — Via `pip` and CLI:**
 ```bash
 pip install git+https://github.com/valuefirst/fde-harness.git
-fde-harness init --client "Acme-Insurance"
+fde-harness init --client "Your-Client-Name"
 ```
 
 **Option B — Via 1-Line Curl Installer:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/valuefirst/fde-harness/main/install.sh | bash -s -- --client "Acme-Insurance"
+curl -fsSL https://raw.githubusercontent.com/valuefirst/fde-harness/main/install.sh | bash -s -- --client "Your-Client-Name"
 ```
 
 *This automatically copies all 29 BMAD agent skills (`.agent/skills`), syncs `_bmad/`, configures `AGENTS.md` & `HARNESS.md`, updates `.gitignore`, and sets up telemetry.*
