@@ -22,17 +22,28 @@ def main():
 
 @main.command("init")
 @click.option("--client", "-c", default="Enterprise-Client", help="Client or organization name for this deployment")
-def init_cmd(client: str):
-    """Initialize FDE Harness telemetry and governance in the current repository."""
+@click.option("--bmad/--no-bmad", default=True, help="Automatically install BMAD framework & agent skills")
+@click.option("--force", "-f", is_flag=True, default=False, help="Overwrite existing configuration files")
+def init_cmd(client: str, bmad: bool, force: bool):
+    """Automatically bootstrap FDE Harness, BMAD skills, and governance in any repository."""
+    import shutil
+    templates_dir = Path(__file__).parent / "templates"
+    
+    # 1. Telemetry Directory
     evo_dir = Path(".fde_evolution")
     evo_dir.mkdir(exist_ok=True)
     traces_file = evo_dir / "traces.jsonl"
     if not traces_file.exists():
         traces_file.touch()
 
+    # 2. Agent Governance & Policy
     agents_file = Path("AGENTS.md")
-    if not agents_file.exists():
-        agents_file.write_text(f"""# FDE Rules for {client}
+    if not agents_file.exists() or force:
+        if (templates_dir / "AGENTS.md").exists():
+            template_content = (templates_dir / "AGENTS.md").read_text()
+            agents_file.write_text(template_content)
+        else:
+            agents_file.write_text(f"""# FDE Rules for {client}
 
 - Human-in-the-Loop (HITL) mandatory: AI operates strictly as a co-author, never an autonomous autopilot.
 - Maintain strict client compliance: default to In-VPC topology and zero external data transit.
@@ -41,16 +52,94 @@ def init_cmd(client: str):
 - Every client delivery must track verified business metrics (baseline vs. achieved cycle time and ROI).
 - Dual-track communication: technical architectural decisions must pair with non-technical executive impact briefings.
 """)
-        console.print("[bold green]✓ Created AGENTS.md with FDE governance policy[/bold green]")
+        console.print("[bold green]✓ Configured AGENTS.md governance rules[/bold green]")
 
+    # 3. HARNESS.md lifecycle guide
+    harness_file = Path("HARNESS.md")
+    if (not harness_file.exists() or force) and (templates_dir / "HARNESS.md").exists():
+        shutil.copy2(templates_dir / "HARNESS.md", harness_file)
+        console.print("[bold green]✓ Installed HARNESS.md execution lifecycle guide[/bold green]")
+
+    # 4. BMAD Framework & Skills installation
+    skills_installed = 0
+    if bmad and templates_dir.exists():
+        # Install .agent/skills
+        src_agent = templates_dir / "agent"
+        if src_agent.exists():
+            target_agent = Path(".agent")
+            shutil.copytree(src_agent, target_agent, dirs_exist_ok=True)
+            # Also provide .agents directory for backwards compatibility
+            target_agents_alt = Path(".agents")
+            shutil.copytree(src_agent, target_agents_alt, dirs_exist_ok=True)
+            skills_dir = target_agent / "skills"
+            if skills_dir.exists():
+                skills_installed = len([d for d in skills_dir.iterdir() if d.is_dir()])
+            console.print(f"[bold green]✓ Installed {skills_installed} BMAD agent skills in .agent/skills/[/bold green]")
+
+        # Install _bmad/ configuration
+        src_bmad = templates_dir / "bmad"
+        if src_bmad.exists():
+            target_bmad = Path("_bmad")
+            shutil.copytree(src_bmad, target_bmad, dirs_exist_ok=True)
+            console.print("[bold green]✓ Installed _bmad/ framework configuration[/bold green]")
+
+    # 5. Automated .gitignore setup
+    gitignore_file = Path(".gitignore")
+    recommended_rules = """
+# BMAD Framework (Core and skills are tracked for cross-repo portability; outputs are ignored)
+_bmad-output/
+*.user.toml
+
+# FDE Harness Telemetry Cache
+.test_fde_evolution/
+"""
+    if gitignore_file.exists():
+        content = gitignore_file.read_text()
+        # Clean up any lines ignoring _bmad or .agent
+        lines = content.splitlines()
+        filtered_lines = [
+            line for line in lines
+            if line.strip() not in ("_bmad/", ".agent/", ".agents/", "_bmad", ".agent", ".agents")
+        ]
+        new_content = "\n".join(filtered_lines)
+        if "_bmad-output/" not in new_content:
+            new_content += recommended_rules
+        gitignore_file.write_text(new_content)
+        console.print("[bold green]✓ Updated .gitignore to ensure BMAD skills remain tracked in Git[/bold green]")
+    else:
+        gitignore_file.write_text(f"""# Python & Environment
+__pycache__/
+*.pyc
+.venv/
+.env
+{recommended_rules}
+""")
+        console.print("[bold green]✓ Created .gitignore with portable BMAD rules[/bold green]")
+
+    # Final summary banner
+    summary_table = Table(title="FDE Workspace Provisioning Complete", header_style="bold cyan")
+    summary_table.add_column("Component", style="bold")
+    summary_table.add_column("Status", style="green")
+    summary_table.add_column("Details")
+
+    summary_table.add_row("Client / Target", client, "Configured in runtime and governance")
+    summary_table.add_row("Telemetry Store", "Active", ".fde_evolution/traces.jsonl initialized")
+    summary_table.add_row("Agent Governance", "Installed", "AGENTS.md & HARNESS.md configured")
+    if bmad:
+        summary_table.add_row("BMAD Skills", f"{skills_installed} Ready", "Equipped in .agent/skills/ for AI coding assistants")
+        summary_table.add_row("BMAD Config", "Installed", "_bmad/ framework core synced")
+    summary_table.add_row("Git Tracking", "Configured", ".gitignore updated (BMAD un-ignored, outputs cached)")
+
+    console.print("\n")
+    console.print(summary_table)
     console.print(
         Panel(
-            f"[bold green]✓ Initialized FDE Harness repository![/bold green]\n\n"
-            f"[bold]Client / Project:[/bold] {client}\n"
-            f"[bold]Telemetry Directory:[/bold] .fde_evolution/ (traces.jsonl ready)\n"
-            f"[bold]Agent Governance:[/bold] AGENTS.md verified\n\n"
-            f"Run [cyan]fde-harness decompose[/cyan] to begin decomposing client requirements.",
-            title="FDE Workspace Initialized",
+            f"[bold green]Ready to solve problems for {client}![/bold green]\n\n"
+            f"Next Steps:\n"
+            f"1. Commit the harness into your repo: [cyan]git add .agent _bmad AGENTS.md .gitignore && git commit -m 'feat: install FDE Harness + BMAD'[/cyan]\n"
+            f"2. Decompose a client problem: [cyan]fde-harness decompose '<problem statement>'[/cyan]\n"
+            f"3. Run with your AI agent: Ask [cyan]Antigravity[/cyan] or [cyan]Cursor[/cyan] to start the 7-phase cycle.",
+            title="Installation Successful",
         )
     )
 

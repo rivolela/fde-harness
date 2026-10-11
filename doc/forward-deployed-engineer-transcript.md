@@ -1,4 +1,4 @@
-# Forward Deployed Engineer (FDE) - Video Transcript
+# Forward Deployed Engineer (FDE)
 
 There's a job in tech right now where mid-level engineers are making 3 to 400 K. Job postings grew over 1,000% in a single year, and most developers have never even heard of it. Now it's called a forward deployed engineer. And the big companies like OpenAI, anthropic, Google, and Palantir are all fighting over these same small pool of people who can actually do it.
 

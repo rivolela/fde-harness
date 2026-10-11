@@ -84,6 +84,24 @@ pip install -e .
 fde-harness init --client "Enterprise-Client"
 ```
 
+### 1b. Installing into an Existing Client Repository (Automated)
+
+When working inside an existing client codebase, you can bootstrap the harness with a single command:
+
+**Option A — Via `pip` and CLI:**
+```bash
+pip install git+https://github.com/valuefirst/fde-harness.git
+fde-harness init --client "Acme-Insurance"
+```
+
+**Option B — Via 1-Line Curl Installer:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/valuefirst/fde-harness/main/install.sh | bash -s -- --client "Acme-Insurance"
+```
+
+*This automatically copies all 29 BMAD agent skills (`.agent/skills`), syncs `_bmad/`, configures `AGENTS.md` & `HARNESS.md`, updates `.gitignore`, and sets up telemetry.*
+
+
 ### 2. Launching with an AI Agent (Fastest Path)
 Open this repository in your AI coding assistant (Antigravity, Cursor, Claude Code, or BMAD). Because [`AGENTS.md`](AGENTS.md) is pre-configured, the agent automatically adopts the FDE role and repository guardrails.
 

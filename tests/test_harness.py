@@ -211,6 +211,21 @@ def call():
         self.assertIn("business_impact", results)
         self.assertIn("executive_briefing", results)
 
+    def test_cli_init_command(self):
+        from click.testing import CliRunner
+        from fde_harness.cli import main
+
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            result = runner.invoke(main, ["init", "--client", "AutomatedTestCorp"])
+            self.assertEqual(result.exit_code, 0)
+            self.assertTrue(os.path.exists(".agent/skills"))
+            self.assertTrue(os.path.exists("_bmad"))
+            self.assertTrue(os.path.exists("AGENTS.md"))
+            self.assertTrue(os.path.exists("HARNESS.md"))
+            self.assertTrue(os.path.exists(".fde_evolution/traces.jsonl"))
+            self.assertTrue(os.path.exists(".gitignore"))
+
 
 if __name__ == "__main__":
     unittest.main()
