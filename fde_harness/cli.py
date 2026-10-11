@@ -24,7 +24,8 @@ def main():
 @click.option("--client", "-c", default="Enterprise-Client", help="Client or organization name for this deployment")
 @click.option("--bmad/--no-bmad", default=True, help="Automatically install BMAD framework & agent skills")
 @click.option("--force", "-f", is_flag=True, default=False, help="Overwrite existing configuration files")
-def init_cmd(client: str, bmad: bool, force: bool):
+@click.option("--co-ai", "--local-only", is_flag=True, default=False, help="Run as personal Co-AI: automatically exclude all FDE/BMAD files in .git/info/exclude without touching client's .gitignore")
+def init_cmd(client: str, bmad: bool, force: bool, co_ai: bool):
     """Automatically bootstrap FDE Harness, BMAD skills, and governance in any repository."""
     import shutil
     templates_dir = Path(__file__).parent / "templates"
@@ -83,9 +84,33 @@ def init_cmd(client: str, bmad: bool, force: bool):
             shutil.copytree(src_bmad, target_bmad, dirs_exist_ok=True)
             console.print("[bold green]✓ Installed _bmad/ framework configuration[/bold green]")
 
-    # 5. Automated .gitignore setup
-    gitignore_file = Path(".gitignore")
-    recommended_rules = """
+    # 5. Git Tracking or Local Exclusion
+    if co_ai:
+        git_dir = Path(".git")
+        if git_dir.exists() and git_dir.is_dir():
+            exclude_file = git_dir / "info" / "exclude"
+            exclude_file.parent.mkdir(parents=True, exist_ok=True)
+            exclude_rules = """
+# Personal FDE Co-AI Harness & BMAD (strictly local)
+_bmad/
+_bmad-output/
+*.user.toml
+.agent/
+.agents/
+.fde_evolution/
+AGENTS.md
+HARNESS.md
+"""
+            current_exclude = exclude_file.read_text(encoding="utf-8") if exclude_file.exists() else ""
+            if "_bmad/" not in current_exclude:
+                with exclude_file.open("a", encoding="utf-8") as f:
+                    f.write(exclude_rules)
+            console.print("[bold green]✓ Configured .git/info/exclude: FDE & BMAD hidden from client Git repo (zero client diff)[/bold green]")
+        else:
+            console.print("[bold yellow]! Warning: .git directory not found. Ensure .git/info/exclude is configured once git is initialized.[/bold yellow]")
+    else:
+        gitignore_file = Path(".gitignore")
+        recommended_rules = """
 # BMAD Framework (Core and skills are tracked for cross-repo portability; outputs are ignored)
 _bmad-output/
 *.user.toml
@@ -93,28 +118,28 @@ _bmad-output/
 # FDE Harness Telemetry Cache
 .test_fde_evolution/
 """
-    if gitignore_file.exists():
-        content = gitignore_file.read_text()
-        # Clean up any lines ignoring _bmad or .agent
-        lines = content.splitlines()
-        filtered_lines = [
-            line for line in lines
-            if line.strip() not in ("_bmad/", ".agent/", ".agents/", "_bmad", ".agent", ".agents")
-        ]
-        new_content = "\n".join(filtered_lines)
-        if "_bmad-output/" not in new_content:
-            new_content += recommended_rules
-        gitignore_file.write_text(new_content)
-        console.print("[bold green]✓ Updated .gitignore to ensure BMAD skills remain tracked in Git[/bold green]")
-    else:
-        gitignore_file.write_text(f"""# Python & Environment
+        if gitignore_file.exists():
+            content = gitignore_file.read_text()
+            # Clean up any lines ignoring _bmad or .agent
+            lines = content.splitlines()
+            filtered_lines = [
+                line for line in lines
+                if line.strip() not in ("_bmad/", ".agent/", ".agents/", "_bmad", ".agent", ".agents")
+            ]
+            new_content = "\n".join(filtered_lines)
+            if "_bmad-output/" not in new_content:
+                new_content += recommended_rules
+            gitignore_file.write_text(new_content)
+            console.print("[bold green]✓ Updated .gitignore to ensure BMAD skills remain tracked in Git[/bold green]")
+        else:
+            gitignore_file.write_text(f"""# Python & Environment
 __pycache__/
 *.pyc
 .venv/
 .env
 {recommended_rules}
 """)
-        console.print("[bold green]✓ Created .gitignore with portable BMAD rules[/bold green]")
+            console.print("[bold green]✓ Created .gitignore with portable BMAD rules[/bold green]")
 
     # Final summary banner
     summary_table = Table(title="FDE Workspace Provisioning Complete", header_style="bold cyan")
@@ -128,17 +153,31 @@ __pycache__/
     if bmad:
         summary_table.add_row("BMAD Skills", f"{skills_installed} Ready", "Equipped in .agent/skills/ for AI coding assistants")
         summary_table.add_row("BMAD Config", "Installed", "_bmad/ framework core synced")
-    summary_table.add_row("Git Tracking", "Configured", ".gitignore updated (BMAD un-ignored, outputs cached)")
+    
+    if co_ai:
+        summary_table.add_row("Git Tracking", "Local Only (Co-AI)", "Excluded in .git/info/exclude (clean client PRs)")
+        next_panel_msg = (
+            f"[bold green]Ready to solve problems for {client} with your local Co-AI![/bold green]\n\n"
+            f"Next Steps:\n"
+            f"1. Zero Client Footprint: All FDE & BMAD files are excluded locally in [cyan].git/info/exclude[/cyan].\n"
+            f"2. Your client Git repo remains 100% clean with no foreign files in your pull requests.\n"
+            f"3. Use with your AI agent: Ask [cyan]Antigravity[/cyan] or [cyan]Cursor[/cyan] to fix bugs or build features with [cyan]bmad-build[/cyan]."
+        )
+    else:
+        summary_table.add_row("Git Tracking", "Configured", ".gitignore updated (BMAD un-ignored, outputs cached)")
+        next_panel_msg = (
+            f"[bold green]Ready to solve problems for {client}![/bold green]\n\n"
+            f"Next Steps:\n"
+            f"1. Commit the harness into your repo: [cyan]git add .agent _bmad AGENTS.md .gitignore && git commit -m 'feat: install FDE Harness + BMAD'[/cyan]\n"
+            f"2. Decompose a client problem: [cyan]fde-harness decompose '<problem statement>'[/cyan]\n"
+            f"3. Run with your AI agent: Ask [cyan]Antigravity[/cyan] or [cyan]Cursor[/cyan] to start the 7-phase cycle."
+        )
 
     console.print("\n")
     console.print(summary_table)
     console.print(
         Panel(
-            f"[bold green]Ready to solve problems for {client}![/bold green]\n\n"
-            f"Next Steps:\n"
-            f"1. Commit the harness into your repo: [cyan]git add .agent _bmad AGENTS.md .gitignore && git commit -m 'feat: install FDE Harness + BMAD'[/cyan]\n"
-            f"2. Decompose a client problem: [cyan]fde-harness decompose '<problem statement>'[/cyan]\n"
-            f"3. Run with your AI agent: Ask [cyan]Antigravity[/cyan] or [cyan]Cursor[/cyan] to start the 7-phase cycle.",
+            next_panel_msg,
             title="Installation Successful",
         )
     )

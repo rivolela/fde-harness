@@ -226,6 +226,34 @@ def call():
             self.assertTrue(os.path.exists(".fde_evolution/traces.jsonl"))
             self.assertTrue(os.path.exists(".gitignore"))
 
+    def test_cli_init_co_ai_mode(self):
+        from click.testing import CliRunner
+        from pathlib import Path
+        from fde_harness.cli import main
+
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            # Create simulated .git directory
+            Path(".git").mkdir()
+            result = runner.invoke(main, ["init", "--client", "ClientCo", "--co-ai"])
+            self.assertEqual(result.exit_code, 0)
+            self.assertTrue(os.path.exists(".agent/skills"))
+            self.assertTrue(os.path.exists("_bmad"))
+            self.assertTrue(os.path.exists("AGENTS.md"))
+            self.assertTrue(os.path.exists("HARNESS.md"))
+            
+            # .gitignore should NOT be created or modified
+            self.assertFalse(os.path.exists(".gitignore"))
+
+            # .git/info/exclude should contain the exclusion rules
+            exclude_path = Path(".git/info/exclude")
+            self.assertTrue(exclude_path.exists())
+            content = exclude_path.read_text()
+            self.assertIn("_bmad/", content)
+            self.assertIn(".agent/", content)
+            self.assertIn("AGENTS.md", content)
+
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -76,5 +76,18 @@
     ],
     "status": "PROPOSED",
     "created_at": 1791716393.725325
+  },
+  {
+    "proposal_id": "PROP-1791719857-PROACTIVE",
+    "target_pillar": "Pillar 2: AI Systems",
+    "category": "WORKFLOW_GUARD",
+    "title": "Scale benchmarking to 500+ enterprise regression test cases",
+    "rationale": "Recent 8 interactions executed cleanly. Next maturity step is rigorous regression suite scaling.",
+    "action_items": [
+      "Synthesize 20 edge-case synthetic enterprise policy documents.",
+      "Add automated ground-truth faithfulness benchmarks before each sprint release."
+    ],
+    "status": "PROPOSED",
+    "created_at": 1791719857.009943
   }
 ]
